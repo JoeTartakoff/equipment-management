@@ -116,6 +116,7 @@ export default function Home() {
   }
 
   // Excelダウンロードハンドラー
+  // Excelダウンロードハンドラー
   const handleExcelDownload = async () => {
     try {
       const { data, error } = await supabase
@@ -125,15 +126,31 @@ export default function Home() {
       
       if (error) throw error
 
-      const excelData = data.map(row => ({
-        '証明書番号': row.certificate_no,
-        '記録日時': new Date(row.record_datetime).toLocaleString('ja-JP'),
-        '機器ID': row.asset_id,
-        '発行元部隊': row.issuing_unit,
-        '受領先部隊': row.receiving_unit,
-        '内容': row.details,
-        '記録者': row.recorder_name
-      }))
+      let excelData
+
+      // データがない場合はヘッダー行のみ
+      if (!data || data.length === 0) {
+        excelData = [{
+          '証明書番号': '',
+          '記録日時': '',
+          '機器ID': '',
+          '発行元部隊': '',
+          '受領先部隊': '',
+          '内容': '',
+          '記録者': ''
+        }]
+      } else {
+        // データがある場合は通常通り
+        excelData = data.map(row => ({
+          '証明書番号': row.certificate_no,
+          '記録日時': new Date(row.record_datetime).toLocaleString('ja-JP'),
+          '機器ID': row.asset_id,
+          '発行元部隊': row.issuing_unit,
+          '受領先部隊': row.receiving_unit,
+          '内容': row.details,
+          '記録者': row.recorder_name
+        }))
+      }
 
       const worksheet = XLSX.utils.json_to_sheet(excelData)
       
