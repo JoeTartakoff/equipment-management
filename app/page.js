@@ -117,6 +117,7 @@ export default function Home() {
 
   // Excelダウンロードハンドラー
   // Excelダウンロードハンドラー
+  // Excelダウンロードハンドラー
   const handleExcelDownload = async () => {
     try {
       const { data, error } = await supabase
@@ -141,23 +142,33 @@ export default function Home() {
         }]
       } else {
         // データがある場合は通常通り
-        excelData = data.map(row => ({
-          '証明書番号': row.certificate_no,
-          '記録日時': new Date(row.record_datetime).toLocaleString('ja-JP', {
-            timeZone: 'Asia/Tokyo',
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit'
-          }),
-          '機器ID': row.asset_id,
-          '発行元部隊': row.issuing_unit,
-          '受領先部隊': row.receiving_unit,
-          '内容': row.details,
-          '記録者': row.recorder_name
-        }))
+        excelData = data.map(row => {
+          // Supabaseから取得した時刻をDateオブジェクトに変換
+          const dbDate = new Date(row.record_datetime)
+          
+          // 日本時間に変換 (UTC + 9時間)
+          const jstDate = new Date(dbDate.getTime() + (9 * 60 * 60 * 1000))
+          
+          // フォーマット
+          const year = jstDate.getFullYear()
+          const month = String(jstDate.getMonth() + 1).padStart(2, '0')
+          const day = String(jstDate.getDate()).padStart(2, '0')
+          const hours = String(jstDate.getHours()).padStart(2, '0')
+          const minutes = String(jstDate.getMinutes()).padStart(2, '0')
+          const seconds = String(jstDate.getSeconds()).padStart(2, '0')
+          
+          const formattedDate = `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`
+
+          return {
+            '証明書番号': row.certificate_no,
+            '記録日時': formattedDate,
+            '機器ID': row.asset_id,
+            '発行元部隊': row.issuing_unit,
+            '受領先部隊': row.receiving_unit,
+            '内容': row.details,
+            '記録者': row.recorder_name
+          }
+        })
       }
 
       const worksheet = XLSX.utils.json_to_sheet(excelData)
