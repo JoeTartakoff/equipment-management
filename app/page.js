@@ -143,7 +143,15 @@ export default function Home() {
         // データがある場合は通常通り
         excelData = data.map(row => ({
           '証明書番号': row.certificate_no,
-          '記録日時': new Date(row.record_datetime).toLocaleString('ja-JP'),
+          '記録日時': new Date(row.record_datetime).toLocaleString('ja-JP', {
+            timeZone: 'Asia/Tokyo',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+          }),
           '機器ID': row.asset_id,
           '発行元部隊': row.issuing_unit,
           '受領先部隊': row.receiving_unit,
@@ -240,7 +248,8 @@ export default function Home() {
         day: '2-digit',
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit'
+        second: '2-digit',
+        timeZone: 'Asia/Tokyo'
       })
 
       setPdfData({
